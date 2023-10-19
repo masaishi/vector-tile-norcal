@@ -5,6 +5,7 @@ admin_osmjson = tmp/$(ADMIN).osm.json
 admin_geojson = tmp/$(ADMIN).geojson
 admin_poly = tmp/$(ADMIN).poly
 admin_pbf = tmp/$(ADMIN).pbf
+tilemaker_config = tmp/tilemaker-config.json
 mbtiles = tmp/region.mbtiles
 tilejson = docs/tiles.json
 stylejson = docs/style.json
@@ -13,9 +14,6 @@ pmtiles = tmp/region.pmtiles
 pmtiles_docs = docs/region.pmtiles
 pmtiles_stylejson = docs/style.pmtiles.json
 
-tilemaker_config = tmp/tilemaker-config.json
-$(tilemaker_config):
-	echo '{ "bounding_box": [-122.0746, 37.0076, -122.0466, 36.9764] }' | tee $(tilemaker_config)
 
 targets = \
 	docs/openmaptiles/fonts/Open\ Sans\ Bold/0-255.pbf \
@@ -26,6 +24,7 @@ targets = \
 	$(admin_geojson) \
 	$(admin_poly) \
 	$(admin_pbf) \
+	$(tilemaker_config) \
 	$(mbtiles) \
 	$(tilejson) \
 	$(zxy_metadata) \
@@ -33,7 +32,6 @@ targets = \
 	$(pmtiles) \
 	$(pmtiles_docs) \
 	$(pmtiles_stylejson) \
-	$(tilemaker_config)
 
 all: $(targets)
 
@@ -135,6 +133,10 @@ $(admin_pbf):
 #
 # tilemaker
 #
+# Add Config file for tilemaker
+$(tilemaker_config):
+	echo '{ "bounding_box": [-122.0746, 37.0076, -122.0466, 36.9764] }' | tee $(tilemaker_config)
+
 # Convert Protocolbuffer Binary format file to MBTiles format file
 $(mbtiles):
 	mkdir -p $(@D)
