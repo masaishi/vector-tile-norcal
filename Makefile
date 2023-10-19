@@ -135,7 +135,11 @@ $(admin_pbf):
 #
 # Add Config file for tilemaker
 $(tilemaker_config):
-	echo '{ "bounding_box": [-122.0746, 37.0076, -122.0466, 36.9764] }' > $(tilemaker_config)
+	echo '{ \
+		"settings": { \
+			"bounding_box": [-122.0746, 37.0076, -122.0466, 36.9764] \
+		} \
+	}' > $(tilemaker_config)
 
 # Convert Protocolbuffer Binary format file to MBTiles format file
 $(mbtiles):
