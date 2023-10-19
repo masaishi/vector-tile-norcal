@@ -141,6 +141,7 @@ $(mbtiles):
 			tilemaker \
 				--threads 3 \
 				--skip-integrity \
+				--bbox -122.0746,37.0076,-122.0466,36.9764 \
 				--input /$(region_pbf) \
 				--output /$(mbtiles)
 
