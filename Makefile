@@ -13,6 +13,10 @@ pmtiles = tmp/region.pmtiles
 pmtiles_docs = docs/region.pmtiles
 pmtiles_stylejson = docs/style.pmtiles.json
 
+tilemaker_config = tmp/tilemaker-config.json
+$(tilemaker_config):
+	echo '{ "bounding_box": [-122.0746, 37.0076, -122.0466, 36.9764] }' | tee $(tilemaker_config)
+
 targets = \
 	docs/openmaptiles/fonts/Open\ Sans\ Bold/0-255.pbf \
 	docs/openmaptiles/fonts/Open\ Sans\ Italic/0-255.pbf \
@@ -28,7 +32,8 @@ targets = \
 	$(stylejson) \
 	$(pmtiles) \
 	$(pmtiles_docs) \
-	$(pmtiles_stylejson)
+	$(pmtiles_stylejson) \
+	$(tilemaker_config)
 
 all: $(targets)
 
@@ -141,7 +146,7 @@ $(mbtiles):
 			tilemaker \
 				--threads 3 \
 				--skip-integrity \
-				--bbox -122.0746,37.0076,-122.0466,36.9764 \
+				--config $(tilemaker_config) \
 				--input /$(region_pbf) \
 				--output /$(mbtiles)
 
