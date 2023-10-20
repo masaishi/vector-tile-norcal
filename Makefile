@@ -98,7 +98,15 @@ $(region_pbf):
 		https://download.geofabrik.de/$(REGION)-latest.osm.pbf
 
 $(ucsc_pbf):
-	osmium extract --bbox=$(BBOX) --output=$(ucsc_pbf) $(region_pbf)
+	docker run \
+		-i \
+		--rm \
+		--mount type=bind,source=$(CURDIR)/tmp,target=/tmp \
+		yuiseki/vector-tile-builder \
+			osmium extract \
+				--bbox=$(BBOX) \
+				--output=/$(ucsc_pbf) \
+				/$(region_pbf)
 
 QUERY = data=[out:json][timeout:30000]; relation["name:en"="$(ADMIN)"]; out geom;
 $(admin_osmjson):
