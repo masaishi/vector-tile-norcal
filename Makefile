@@ -1,12 +1,11 @@
 include .env
 
 region_pbf = tmp/osm/$(REGION)-latest.osm.pbf
+ucsc_pbf = tmp/osm/ucsc.osm.pbf
 admin_osmjson = tmp/$(ADMIN).osm.json
 admin_geojson = tmp/$(ADMIN).geojson
 admin_poly = tmp/$(ADMIN).poly
 admin_pbf = tmp/$(ADMIN).pbf
-tilemaker_config = tmp/tilemaker-config.json
-tilemaker_process = tmp/process-openmaptiles.lua
 mbtiles = tmp/region.mbtiles
 tilejson = docs/tiles.json
 stylejson = docs/style.json
@@ -20,12 +19,11 @@ targets = \
 	docs/openmaptiles/fonts/Open\ Sans\ Italic/0-255.pbf \
 	docs/openmaptiles/fonts/Open\ Sans\ Regular/0-255.pbf \
 	$(region_pbf) \
+	$(ucsc_pbf) \
 	$(admin_osmjson) \
 	$(admin_geojson) \
 	$(admin_poly) \
 	$(admin_pbf) \
-	$(tilemaker_config) \
-	$(tilemaker_process) \
 	$(mbtiles) \
 	$(tilejson) \
 	$(zxy_metadata) \
@@ -98,7 +96,9 @@ $(region_pbf):
 		--continue-at - \
 		--output $(region_pbf) \
 		https://download.geofabrik.de/$(REGION)-latest.osm.pbf
-	osmium extract --bbox $(BBOX) --output $(region_pbf) $(region_pbf)
+
+$(ucsc_pbf):
+	osmium extract --bbox=$(BBOX) --output=$(ucsc_pbf) $(region_pbf)
 
 QUERY = data=[out:json][timeout:30000]; relation["name:en"="$(ADMIN)"]; out geom;
 $(admin_osmjson):
@@ -129,18 +129,11 @@ $(admin_pbf):
 		--rm \
 		--mount type=bind,source=$(CURDIR)/tmp,target=/tmp \
 		yuiseki/vector-tile-builder \
-			osmconvert /$(region_pbf) -B="/$(admin_poly)" --complete-ways -o=/$(admin_pbf)
+			osmconvert /$(ucsc_pbf) -B="/$(admin_poly)" --complete-ways -o=/$(admin_pbf)
 
 #
 # tilemaker
 #
-# Add Config file for tilemaker
-$(tilemaker_config):
-	cp data/tilemaker-config.json $(tilemaker_config)
-
-$(tilemaker_process):
-	cp data/process-openmaptiles.lua $(tilemaker_process)
-
 # Convert Protocolbuffer Binary format file to MBTiles format file
 $(mbtiles):
 	mkdir -p $(@D)
@@ -152,7 +145,7 @@ $(mbtiles):
 			tilemaker \
 				--threads 3 \
 				--skip-integrity \
-				--input /$(region_pbf) \
+				--input /$(ucsc_pbf) \
 				--output /$(mbtiles)
 
 
