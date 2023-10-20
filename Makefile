@@ -1,7 +1,7 @@
 include .env
 
 #region_pbf = tmp/osm/$(REGION)-latest.osm.pbf
-region_pbf = data/map.osm
+region_pbf = tmp/map.osm
 admin_osmjson = tmp/$(ADMIN).osm.json
 admin_geojson = tmp/$(ADMIN).geojson
 admin_poly = tmp/$(ADMIN).poly
