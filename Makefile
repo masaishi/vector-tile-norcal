@@ -135,25 +135,7 @@ $(admin_pbf):
 #
 # Add Config file for tilemaker
 $(tilemaker_config):
-	echo '{ \
-		"layers": { \
-			"roads": { "minzoom": 12, "maxzoom": 14 }, \
-			"buildings": { "minzoom": 14, "maxzoom": 14 }, \
-			"pois": { "minzoom": 13, "maxzoom": 14 } \
-		}, \
-		"settings": { \
-			"minzoom": 12, \
-			"maxzoom": 14, \
-			"basezoom": 14, \
-			"include_ids": false, \
-			"compress": true, \
-			"name": "UCSC", \
-			"version": "0.1", \
-			"description": "Sample vector tiles for UCSC", \
-			"bounding_box": [-122.0746, 37.0076, -122.0466, 36.9764] \
-		} \
-	}' > /$(tilemaker_config)
-
+	echo '{"layers": {"roads": {"minzoom": 12, "maxzoom": 14}, "buildings": {"minzoom": 14, "maxzoom": 14}, "pois": {"minzoom": 13, "maxzoom": 14}}, "settings": {"minzoom": 12, "maxzoom": 14, "basezoom": 14, "include_ids": false, "compress": true, "name": "UCSC", "version": "0.1", "description": "Sample vector tiles for UCSC", "bounding_box": [-122.0746, 37.0076, -122.0466, 36.9764]}}' > $(tilemaker_config)
 
 # Convert Protocolbuffer Binary format file to MBTiles format file
 $(mbtiles):
