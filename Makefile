@@ -1,7 +1,6 @@
 include .env
 
 region_pbf = tmp/osm/$(REGION)-latest.osm.pbf
-ucsc_pbf = tmp/osm/ucsc.osm.pbf
 admin_osmjson = tmp/$(ADMIN).osm.json
 admin_geojson = tmp/$(ADMIN).geojson
 admin_poly = tmp/$(ADMIN).poly
@@ -19,7 +18,6 @@ targets = \
 	docs/openmaptiles/fonts/Open\ Sans\ Italic/0-255.pbf \
 	docs/openmaptiles/fonts/Open\ Sans\ Regular/0-255.pbf \
 	$(region_pbf) \
-	$(ucsc_pbf) \
 	$(admin_osmjson) \
 	$(admin_geojson) \
 	$(admin_poly) \
