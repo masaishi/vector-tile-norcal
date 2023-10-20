@@ -21,14 +21,7 @@ targets = \
 	$(admin_osmjson) \
 	$(admin_geojson) \
 	$(admin_poly) \
-	$(admin_pbf) \
-	$(mbtiles) \
-	$(tilejson) \
-	$(zxy_metadata) \
-	$(stylejson) \
-	$(pmtiles) \
-	$(pmtiles_docs) \
-	$(pmtiles_stylejson)
+	$(admin_pbf) 
 
 all: $(targets)
 
