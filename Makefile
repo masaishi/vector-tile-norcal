@@ -152,7 +152,7 @@ $(tilemaker_config):
 			"description": "Sample vector tiles for UCSC", \
 			"bounding_box": [-122.0746, 37.0076, -122.0466, 36.9764] \
 		} \
-	}' > $(tilemaker_config)
+	}' > /$(tilemaker_config)
 
 
 # Convert Protocolbuffer Binary format file to MBTiles format file
