@@ -5,7 +5,6 @@ admin_osmjson = tmp/$(ADMIN).osm.json
 admin_geojson = tmp/$(ADMIN).geojson
 admin_poly = tmp/$(ADMIN).poly
 admin_pbf = tmp/$(ADMIN).pbf
-tilemaker_config = tmp/tilemaker-config.json 
 mbtiles = tmp/region.mbtiles
 tilejson = docs/tiles.json
 stylejson = docs/style.json
@@ -13,7 +12,6 @@ zxy_metadata = docs/zxy/metadata.json
 pmtiles = tmp/region.pmtiles
 pmtiles_docs = docs/region.pmtiles
 pmtiles_stylejson = docs/style.pmtiles.json
-
 
 targets = \
 	docs/openmaptiles/fonts/Open\ Sans\ Bold/0-255.pbf \
@@ -24,18 +22,18 @@ targets = \
 	$(admin_geojson) \
 	$(admin_poly) \
 	$(admin_pbf) \
-	$(tilemaker_config) \
 	$(mbtiles) \
 	$(tilejson) \
 	$(zxy_metadata) \
 	$(stylejson) \
 	$(pmtiles) \
 	$(pmtiles_docs) \
-	$(pmtiles_stylejson) \
+	$(pmtiles_stylejson)
 
 all: $(targets)
 
 clean:
+	sudo chmod 777 -R tmp
 	rm -rf docs/zxy/*
 	rm -f $(mbtiles)
 	rm -f $(stylejson)
@@ -45,6 +43,7 @@ clean:
 	rm -f $(pmtiles_stylejson)
 
 clean-all: clean
+	sudo chmod 777 -R tmp
 	rm -f $(admin_osmjson)
 	rm -f $(admin_geojson)
 	rm -f $(admin_poly)
@@ -126,7 +125,6 @@ $(admin_pbf):
 		--mount type=bind,source=$(CURDIR)/tmp,target=/tmp \
 		yuiseki/vector-tile-builder \
 			osmconvert /$(region_pbf) -B="/$(admin_poly)" --complete-ways -o=/$(admin_pbf)
-
 
 ##
 ## tilemaker
