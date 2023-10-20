@@ -1,6 +1,7 @@
 include .env
 
-region_pbf = tmp/osm/$(REGION)-latest.osm.pbf
+#region_pbf = tmp/osm/$(REGION)-latest.osm.pbf
+region_pbf = data/map.osm
 admin_osmjson = tmp/$(ADMIN).osm.json
 admin_geojson = tmp/$(ADMIN).geojson
 admin_poly = tmp/$(ADMIN).poly
@@ -19,7 +20,6 @@ targets = \
 	docs/openmaptiles/fonts/Open\ Sans\ Bold/0-255.pbf \
 	docs/openmaptiles/fonts/Open\ Sans\ Italic/0-255.pbf \
 	docs/openmaptiles/fonts/Open\ Sans\ Regular/0-255.pbf \
-	$(region_pbf) \
 	$(admin_osmjson) \
 	$(admin_geojson) \
 	$(admin_poly) \
@@ -90,13 +90,13 @@ docker-push:
 	docker push yuiseki/vector-tile-builder:latest
 	docker push yuiseki/go-pmtiles:latest
 
-# Download OpenStreetMap data as Protocolbuffer Binary format file
-$(region_pbf):
-	mkdir -p $(@D)
-	curl \
-		--continue-at - \
-		--output $(region_pbf) \
-		https://download.geofabrik.de/$(REGION)-latest.osm.pbf
+## Download OpenStreetMap data as Protocolbuffer Binary format file
+#$(region_pbf):
+#	mkdir -p $(@D)
+#	curl \
+#		--continue-at - \
+#		--output $(region_pbf) \
+#		https://download.geofabrik.de/$(REGION)-latest.osm.pbf
 
 QUERY = data=[out:json][timeout:30000]; relation["name:en"="$(ADMIN)"]; out geom;
 $(admin_osmjson):
@@ -133,10 +133,6 @@ $(admin_pbf):
 #
 # tilemaker
 #
-# Add Config file for tilemaker
-$(tilemaker_config):
-	echo '{"settings": {"minzoom": 12, "maxzoom": 14, "basezoom": 14, "include_ids": false, "compress": "none", "combine_below": 14, "name": "UCSC", "version": "0.1", "description": "Sample vector tiles for UCSC", "bounding_box": [-122.0746, 37.0076, -122.0466, 36.9764]}}' > $(tilemaker_config)
-
 # Convert Protocolbuffer Binary format file to MBTiles format file
 $(mbtiles):
 	mkdir -p $(@D)
@@ -148,7 +144,6 @@ $(mbtiles):
 			tilemaker \
 				--threads 3 \
 				--skip-integrity \
-				--config /$(tilemaker_config) \
 				--input /$(region_pbf) \
 				--output /$(mbtiles)
 
