@@ -1,7 +1,6 @@
 include .env
 
-#region_pbf = tmp/osm/$(REGION)-latest.osm.pbf
-region_pbf = tmp/map.osm
+region_pbf = tmp/osm/$(REGION)-latest.osm.pbf
 admin_osmjson = tmp/$(ADMIN).osm.json
 admin_geojson = tmp/$(ADMIN).geojson
 admin_poly = tmp/$(ADMIN).poly
@@ -37,7 +36,6 @@ targets = \
 all: $(targets)
 
 clean:
-	sudo chmod 777 -R tmp
 	rm -rf docs/zxy/*
 	rm -f $(mbtiles)
 	rm -f $(stylejson)
@@ -47,7 +45,6 @@ clean:
 	rm -f $(pmtiles_stylejson)
 
 clean-all: clean
-	sudo chmod 777 -R tmp
 	rm -f $(admin_osmjson)
 	rm -f $(admin_geojson)
 	rm -f $(admin_poly)
@@ -91,16 +88,13 @@ docker-push:
 	docker push yuiseki/vector-tile-builder:latest
 	docker push yuiseki/go-pmtiles:latest
 
-## Download OpenStreetMap data as Protocolbuffer Binary format file
-#$(region_pbf):
-#	mkdir -p $(@D)
-#	curl \
-#		--continue-at - \
-#		--output $(region_pbf) \
-#		https://download.geofabrik.de/$(REGION)-latest.osm.pbf
-
+# Download OpenStreetMap data as Protocolbuffer Binary format file
 $(region_pbf):
-	cp -f data/map.osm $(region_pbf)
+	mkdir -p $(@D)
+	curl \
+		--continue-at - \
+		--output $(region_pbf) \
+		https://download.geofabrik.de/$(REGION)-latest.osm.pbf
 
 QUERY = data=[out:json][timeout:30000]; relation["name:en"="$(ADMIN)"]; out geom;
 $(admin_osmjson):
@@ -125,101 +119,105 @@ $(admin_poly):
 		yuiseki/vector-tile-builder \
 			geojson2poly /$(admin_geojson) /$(admin_poly)
 
-#$(admin_pbf):
+$(admin_pbf):
+	docker run \
+		-i \
+		--rm \
+		--mount type=bind,source=$(CURDIR)/tmp,target=/tmp \
+		yuiseki/vector-tile-builder \
+			osmconvert /$(region_pbf) -B="/$(admin_poly)" --complete-ways -o=/$(admin_pbf)
+
+
+##
+## tilemaker
+##
+### Add Config file for tilemaker
+##$(tilemaker_config):
+##	echo '{"settings": {"minzoom": 12, "maxzoom": 14, "basezoom": 14, "include_ids": false, "compress": "none", "combine_below": 14, "name": "UCSC", "version": "0.1", "description": "Sample vector tiles for UCSC", "bounding_box": [-122.0746, 37.0076, -122.0466, 36.9764]}}' > $(tilemaker_config)
+
+## Convert Protocolbuffer Binary format file to MBTiles format file
+#$(mbtiles):
+#	mkdir -p $(@D)
 #	docker run \
 #		-i \
 #		--rm \
 #		--mount type=bind,source=$(CURDIR)/tmp,target=/tmp \
 #		yuiseki/vector-tile-builder \
-#			osmconvert /$(region_pbf) -B="/$(admin_poly)" --complete-ways -o=/$(admin_pbf) -b=-122.0746,37.0076,-122.0466,36.9764
+#			tilemaker \
+#				--threads 3 \
+#				--skip-integrity \
+#				--input /$(region_pbf) \
+#				--output /$(mbtiles)
 
 
-#
-# tilemaker
-#
-# Convert Protocolbuffer Binary format file to MBTiles format file
-$(mbtiles):
-	mkdir -p $(@D)
-	docker run \
-		-i \
-		--rm \
-		--mount type=bind,source=$(CURDIR)/tmp,target=/tmp \
-		yuiseki/vector-tile-builder \
-			tilemaker \
-				--threads 3 \
-				--skip-integrity \
-				--input /$(region_pbf) \
-				--output /$(mbtiles)
+## Generate TileJSON format file from MBTiles format file
+#$(tilejson):
+#	mkdir -p $(@D)
+#	docker run \
+#		-i \
+#		--rm \
+#		--mount type=bind,source=$(CURDIR)/tmp,target=/tmp \
+#		yuiseki/vector-tile-builder \
+#			mbtiles2tilejson \
+#				/tmp/region.mbtiles \
+#				--url $(TILES_URL) > docs/tiles.json
+#	sed "s|http://localhost:5000/|$(BASE_PATH)|g" -i docs/tiles.json
 
 
-# Generate TileJSON format file from MBTiles format file
-$(tilejson):
-	mkdir -p $(@D)
-	docker run \
-		-i \
-		--rm \
-		--mount type=bind,source=$(CURDIR)/tmp,target=/tmp \
-		yuiseki/vector-tile-builder \
-			mbtiles2tilejson \
-				/tmp/region.mbtiles \
-				--url $(TILES_URL) > docs/tiles.json
-	sed "s|http://localhost:5000/|$(BASE_PATH)|g" -i docs/tiles.json
+##
+## tippecanoe
+##
+## Split MBTiles format file to zxy orderd Protocolbuffer Binary format files
+#$(zxy_metadata):
+#	mkdir -p $(@D)
+#	docker run \
+#		-i \
+#		--rm \
+#		--mount type=bind,source=$(CURDIR)/tmp,target=/tmp \
+#		yuiseki/vector-tile-builder \
+#			tile-join \
+#				--force \
+#				--no-tile-compression \
+#				--no-tile-size-limit \
+#				--no-tile-stats \
+#				--output-to-directory=/tmp/zxy \
+#				/$(mbtiles)
+#	cp -r tmp/zxy docs/
 
 
-#
-# tippecanoe
-#
-# Split MBTiles format file to zxy orderd Protocolbuffer Binary format files
-$(zxy_metadata):
-	mkdir -p $(@D)
-	docker run \
-		-i \
-		--rm \
-		--mount type=bind,source=$(CURDIR)/tmp,target=/tmp \
-		yuiseki/vector-tile-builder \
-			tile-join \
-				--force \
-				--no-tile-compression \
-				--no-tile-size-limit \
-				--no-tile-stats \
-				--output-to-directory=/tmp/zxy \
-				/$(mbtiles)
-	cp -r tmp/zxy docs/
+##
+## charites
+##
+## Generate style.json from style.yml
+#$(stylejson):
+#	docker run \
+#		-i \
+#		--rm \
+#		--mount type=bind,source=$(CURDIR)/,target=/app \
+#		yuiseki/vector-tile-builder \
+#			charites build style.yml docs/style.json
+#	sed "s|http://localhost:5000/|$(BASE_PATH)|g" -i docs/style.json
 
 
-#
-# charites
-#
-# Generate style.json from style.yml
-$(stylejson):
-	docker run \
-		-i \
-		--rm \
-		--mount type=bind,source=$(CURDIR)/,target=/app \
-		yuiseki/vector-tile-builder \
-			charites build style.yml docs/style.json
-	sed "s|http://localhost:5000/|$(BASE_PATH)|g" -i docs/style.json
+##
+## go-pmtiles
+##
+## Convert MBTiles format file to PMtiles format file
+#$(pmtiles):
+#	mkdir -p $(@D)
+#	docker run \
+#		-i \
+#		--rm \
+#		--mount type=bind,source=$(CURDIR)/tmp,target=/tmp \
+#		yuiseki/go-pmtiles \
+#			convert /$(mbtiles) /$(pmtiles)
 
+#$(pmtiles_docs): $(pmtiles)
+#	cp -f $(pmtiles) $(pmtiles_docs)
 
-#
-# go-pmtiles
-#
-# Convert MBTiles format file to PMtiles format file
-$(pmtiles):
-	mkdir -p $(@D)
-	docker run \
-		-i \
-		--rm \
-		--mount type=bind,source=$(CURDIR)/tmp,target=/tmp \
-		yuiseki/go-pmtiles \
-			convert /$(mbtiles) /$(pmtiles)
-
-$(pmtiles_docs): $(pmtiles)
-	cp -f $(pmtiles) $(pmtiles_docs)
-
-$(pmtiles_stylejson): $(stylejson)
-	cp -f $(stylejson) $(pmtiles_stylejson)
-	sed "s|$(BASE_PATH)tile.json|pmtiles://$(BASE_PATH)region.pmtiles|g" -i $(pmtiles_stylejson)
+#$(pmtiles_stylejson): $(stylejson)
+#	cp -f $(stylejson) $(pmtiles_stylejson)
+#	sed "s|$(BASE_PATH)tile.json|pmtiles://$(BASE_PATH)region.pmtiles|g" -i $(pmtiles_stylejson)
 
 
 docs/openmaptiles/fonts/Open\ Sans\ Bold/0-255.pbf:
@@ -234,60 +232,60 @@ docs/openmaptiles/fonts/Open\ Sans\ Regular/0-255.pbf:
 	cd docs/openmaptiles/fonts && unzip Open\ Sans\ Regular.zip
 	chmod 777 -R docs/openmaptiles/fonts
 
-# Launch local tile server
-.PHONY: start
-start:
-	docker run \
-		-it \
-		--rm \
-		--mount type=bind,source=$(CURDIR)/docs,target=/app/docs \
-		-p $(PORT):$(PORT) \
-		yuiseki/vector-tile-builder \
-			http-server \
-				-p $(PORT) \
-				docs
+## Launch local tile server
+#.PHONY: start
+#start:
+#	docker run \
+#		-it \
+#		--rm \
+#		--mount type=bind,source=$(CURDIR)/docs,target=/app/docs \
+#		-p $(PORT):$(PORT) \
+#		yuiseki/vector-tile-builder \
+#			http-server \
+#				-p $(PORT) \
+#				docs
 
-# Initialize gh-pages branch
-.PHONY: init-gh-pages
-init-gh-pages:
-	git checkout --orphan gh-pages
-	git commit --allow-empty -m "empty commit"
-	git push -u origin gh-pages
-	git checkout main
+## Initialize gh-pages branch
+#.PHONY: init-gh-pages
+#init-gh-pages:
+#	git checkout --orphan gh-pages
+#	git commit --allow-empty -m "empty commit"
+#	git push -u origin gh-pages
+#	git checkout main
 
-# Publish ./docs to GitHub Pages, with ignoring .gitignore
-.PHONY: gh-pages
-gh-pages:
-	sed -i '/docs/d' ./.gitignore
-	git add .
-	git commit -m "Edit .gitignore to publish"
-	git push origin `git subtree split --prefix docs main`:gh-pages --force
-	git reset HEAD~
-	git checkout .gitignore
+## Publish ./docs to GitHub Pages, with ignoring .gitignore
+#.PHONY: gh-pages
+#gh-pages:
+#	sed -i '/docs/d' ./.gitignore
+#	git add .
+#	git commit -m "Edit .gitignore to publish"
+#	git push origin `git subtree split --prefix docs main`:gh-pages --force
+#	git reset HEAD~
+#	git checkout .gitignore
 
-# Configure Raspberry Pi as Wi-Fi AP
-# need to call with sudo
-# `sudo make build-wifi-ap`
-.PHONY: build-wifi-ap
-build-wifi-ap:
-	@echo -n "Are you sure? [y/N] " && read ans && [ $${ans:-N} = y ]
-	@echo "Starting to configure Wi-Fi AP..."
-	cat /etc/rpi-issue
-	apt update
-	apt upgrade -y
-	DEBIAN_FRONTEND=noninteractive \
-		apt install -y \
-			hostapd \
-			dnsmasq \
-			netfilter-persistent \
-			iptables-persistent
-	systemctl unmask hostapd
-	systemctl enable hostapd
-	cp conf/etc/dhcpcd.conf /etc/dhcpcd.conf
-	cp conf/etc/dnsmasq.conf /etc/dnsmasq.conf
-	cp conf/etc/hostapd/hostapd.conf /etc/hostapd/hostapd.conf
-	cp conf/etc/sysctl.d/routed-ap.conf /etc/sysctl.d/routed-ap.conf
-	iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
-	netfilter-persistent save
-	rfkill unblock wlan
-	systemctl reboot
+## Configure Raspberry Pi as Wi-Fi AP
+## need to call with sudo
+## `sudo make build-wifi-ap`
+#.PHONY: build-wifi-ap
+#build-wifi-ap:
+#	@echo -n "Are you sure? [y/N] " && read ans && [ $${ans:-N} = y ]
+#	@echo "Starting to configure Wi-Fi AP..."
+#	cat /etc/rpi-issue
+#	apt update
+#	apt upgrade -y
+#	DEBIAN_FRONTEND=noninteractive \
+#		apt install -y \
+#			hostapd \
+#			dnsmasq \
+#			netfilter-persistent \
+#			iptables-persistent
+#	systemctl unmask hostapd
+#	systemctl enable hostapd
+#	cp conf/etc/dhcpcd.conf /etc/dhcpcd.conf
+#	cp conf/etc/dnsmasq.conf /etc/dnsmasq.conf
+#	cp conf/etc/hostapd/hostapd.conf /etc/hostapd/hostapd.conf
+#	cp conf/etc/sysctl.d/routed-ap.conf /etc/sysctl.d/routed-ap.conf
+#	iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
+#	netfilter-persistent save
+#	rfkill unblock wlan
+#	systemctl reboot
