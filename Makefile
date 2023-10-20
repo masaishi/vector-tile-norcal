@@ -20,6 +20,7 @@ targets = \
 	docs/openmaptiles/fonts/Open\ Sans\ Bold/0-255.pbf \
 	docs/openmaptiles/fonts/Open\ Sans\ Italic/0-255.pbf \
 	docs/openmaptiles/fonts/Open\ Sans\ Regular/0-255.pbf \
+	$(region_pbf) \
 	$(admin_osmjson) \
 	$(admin_geojson) \
 	$(admin_poly) \
@@ -127,7 +128,7 @@ $(admin_pbf):
 		--rm \
 		--mount type=bind,source=$(CURDIR)/tmp,target=/tmp \
 		yuiseki/vector-tile-builder \
-			osmconvert $(region_pbf) -B="/$(admin_poly)" --complete-ways -o=/$(admin_pbf) -b=-122.0746,37.0076,-122.0466,36.9764
+			osmconvert /$(region_pbf) -B="/$(admin_poly)" --complete-ways -o=/$(admin_pbf) -b=-122.0746,37.0076,-122.0466,36.9764
 
 
 #
@@ -144,7 +145,7 @@ $(mbtiles):
 			tilemaker \
 				--threads 3 \
 				--skip-integrity \
-				--input $(region_pbf) \
+				--input /$(region_pbf) \
 				--output /$(mbtiles)
 
 
