@@ -97,16 +97,16 @@ $(region_pbf):
 		--output $(region_pbf) \
 		https://download.geofabrik.de/$(REGION)-latest.osm.pbf
 
-$(ucsc_pbf):
-	docker run \
-		-i \
-		--rm \
-		--mount type=bind,source=$(CURDIR)/tmp,target=/tmp \
-		yuiseki/vector-tile-builder \
-			osmium extract \
-				--bbox=$(BBOX) \
-				--output=/$(ucsc_pbf) \
-				/$(region_pbf)
+#$(ucsc_pbf):
+#	docker run \
+#		-i \
+#		--rm \
+#		--mount type=bind,source=$(CURDIR)/tmp,target=/tmp \
+#		yuiseki/vector-tile-builder \
+#			osmium extract \
+#				--bbox=$(BBOX) \
+#				--output=/$(ucsc_pbf) \
+#				/$(region_pbf)
 
 QUERY = data=[out:json][timeout:30000]; relation["name:en"="$(ADMIN)"]; out geom;
 $(admin_osmjson):
@@ -137,7 +137,7 @@ $(admin_pbf):
 		--rm \
 		--mount type=bind,source=$(CURDIR)/tmp,target=/tmp \
 		yuiseki/vector-tile-builder \
-			osmconvert /$(ucsc_pbf) -B="/$(admin_poly)" --complete-ways -o=/$(admin_pbf)
+			osmconvert /$(region_pbf) -B="/$(admin_poly)" --complete-ways -o=/$(admin_pbf)
 
 #
 # tilemaker
@@ -153,7 +153,7 @@ $(mbtiles):
 			tilemaker \
 				--threads 3 \
 				--skip-integrity \
-				--input /$(ucsc_pbf) \
+				--input /$(region_pbf) \
 				--output /$(mbtiles)
 
 
