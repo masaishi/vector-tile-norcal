@@ -1,0 +1,15 @@
+{
+"name": "Tilemaker to OpenMapTiles schema",
+"description": "Tile config based on OpenMapTiles schema",
+"version": "2",
+"minzoom": "0",
+"maxzoom": "14",
+"center": "-121.999200,36.977650,14",
+"bounds": "-122.167969,36.879621,-121.816406,37.020098",
+"antimeridian_adjusted_bounds": "-122.167969,36.879621,-121.816406,37.020098",
+"type": "overlay",
+"format": "pbf",
+"generator": "tile-join v2.26.1",
+"generator_options": "tile-join --force --no-tile-compression --no-tile-size-limit --no-tile-stats '--output-to-directory=/tmp/zxy' /tmp/region.mbtiles",
+"json": "{\"vector_layers\":[{\"id\":\"aeroway\",\"description\":\"\",\"minzoom\":11,\"maxzoom\":11,\"fields\":{\"class\":\"String\"}},{\"id\":\"landcover\",\"description\":\"\",\"minzoom\":7,\"maxzoom\":11,\"fields\":{\"class\":\"String\",\"subclass\":\"String\"}},{\"id\":\"landuse\",\"description\":\"\",\"minzoom\":8,\"maxzoom\":11,\"fields\":{\"class\":\"String\"}},{\"id\":\"mountain_peak\",\"description\":\"\",\"minzoom\":11,\"maxzoom\":11,\"fields\":{\"class\":\"String\",\"ele\":\"Number\",\"ele_ft\":\"Number\",\"name:latin\":\"String\",\"rank\":\"Number\"}},{\"id\":\"park\",\"description\":\"\",\"minzoom\":11,\"maxzoom\":11,\"fields\":{\"class\":\"String\",\"name:latin\":\"String\"}},{\"id\":\"place\",\"description\":\"\",\"minzoom\":5,\"maxzoom\":11,\"fields\":{\"class\":\"String\",\"name:latin\":\"String\"}},{\"id\":\"transportation\",\"description\":\"\",\"minzoom\":4,\"maxzoom\":11,\"fields\":{\"access\":\"String\",\"bicycle\":\"String\",\"brunnel\":\"String\",\"class\":\"String\",\"foot\":\"String\",\"horse\":\"String\",\"oneway\":\"Number\",\"ramp\":\"Number\",\"surface\":\"String\"}},{\"id\":\"transportation_name\",\"description\":\"\",\"minzoom\":8,\"maxzoom\":11,\"fields\":{\"class\":\"String\",\"name:latin\":\"String\",\"network\":\"String\",\"ref\":\"String\",\"ref_length\":\"Number\"}},{\"id\":\"water\",\"description\":\"\",\"minzoom\":10,\"maxzoom\":11,\"fields\":{\"class\":\"String\"}},{\"id\":\"waterway\",\"description\":\"\",\"minzoom\":8,\"maxzoom\":11,\"fields\":{\"brunnel\":\"String\",\"class\":\"String\",\"intermittent\":\"Number\",\"name:latin\":\"String\"}}]}"
+}
