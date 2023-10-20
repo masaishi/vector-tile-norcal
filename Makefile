@@ -125,13 +125,13 @@ $(admin_poly):
 		yuiseki/vector-tile-builder \
 			geojson2poly /$(admin_geojson) /$(admin_poly)
 
-$(admin_pbf):
-	docker run \
-		-i \
-		--rm \
-		--mount type=bind,source=$(CURDIR)/tmp,target=/tmp \
-		yuiseki/vector-tile-builder \
-			osmconvert /$(region_pbf) -B="/$(admin_poly)" --complete-ways -o=/$(admin_pbf) -b=-122.0746,37.0076,-122.0466,36.9764 --all-to-nodes
+#$(admin_pbf):
+#	docker run \
+#		-i \
+#		--rm \
+#		--mount type=bind,source=$(CURDIR)/tmp,target=/tmp \
+#		yuiseki/vector-tile-builder \
+#			osmconvert /$(region_pbf) -B="/$(admin_poly)" --complete-ways -o=/$(admin_pbf) -b=-122.0746,37.0076,-122.0466,36.9764
 
 
 #
