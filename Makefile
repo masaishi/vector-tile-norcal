@@ -6,6 +6,7 @@ admin_geojson = tmp/$(ADMIN).geojson
 admin_poly = tmp/$(ADMIN).poly
 admin_pbf = tmp/$(ADMIN).pbf
 tilemaker_config = tmp/tilemaker-config.json
+tilemaker_process = tmp/process-openmaptiles.lua
 mbtiles = tmp/region.mbtiles
 tilejson = docs/tiles.json
 stylejson = docs/style.json
@@ -24,6 +25,7 @@ targets = \
 	$(admin_poly) \
 	$(admin_pbf) \
 	$(tilemaker_config) \
+	$(tilemaker_process) \
 	$(mbtiles) \
 	$(tilejson) \
 	$(zxy_metadata) \
@@ -96,6 +98,7 @@ $(region_pbf):
 		--continue-at - \
 		--output $(region_pbf) \
 		https://download.geofabrik.de/$(REGION)-latest.osm.pbf
+	osmium extract --bbox $(BBOX) --output $(region_pbf) $(region_pbf)
 
 QUERY = data=[out:json][timeout:30000]; relation["name:en"="$(ADMIN)"]; out geom;
 $(admin_osmjson):
@@ -133,7 +136,10 @@ $(admin_pbf):
 #
 # Add Config file for tilemaker
 $(tilemaker_config):
-	echo '{"settings": {"minzoom": 12, "maxzoom": 14, "basezoom": 14, "include_ids": false, "compress": "none", "combine_below": 14, "name": "UCSC", "version": "0.1", "description": "Sample vector tiles for UCSC", "bounding_box": [-122.0746, 37.0076, -122.0466, 36.9764]}}' > $(tilemaker_config)
+	cp data/tilemaker-config.json $(tilemaker_config)
+
+$(tilemaker_process):
+	cp data/process-openmaptiles.lua $(tilemaker_process)
 
 # Convert Protocolbuffer Binary format file to MBTiles format file
 $(mbtiles):
@@ -249,6 +255,7 @@ start:
 .PHONY: init-gh-pages
 init-gh-pages:
 	git checkout --orphan gh-pages
+	git config http.postBuffer 524288000
 	git commit --allow-empty -m "empty commit"
 	git push -u origin gh-pages
 	git checkout main
@@ -257,6 +264,7 @@ init-gh-pages:
 .PHONY: gh-pages
 gh-pages:
 	sed -i '/docs/d' ./.gitignore
+	git config http.postBuffer 524288000
 	git add .
 	git commit -m "Edit .gitignore to publish"
 	git push origin `git subtree split --prefix docs main`:gh-pages --force
