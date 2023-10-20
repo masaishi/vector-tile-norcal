@@ -99,6 +99,9 @@ docker-push:
 #		--output $(region_pbf) \
 #		https://download.geofabrik.de/$(REGION)-latest.osm.pbf
 
+$(region_pbf):
+	cp -f data/map.osm $(region_pbf)
+
 QUERY = data=[out:json][timeout:30000]; relation["name:en"="$(ADMIN)"]; out geom;
 $(admin_osmjson):
 	curl 'https://overpass-api.de/api/interpreter' \
