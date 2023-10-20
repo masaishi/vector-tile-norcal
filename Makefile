@@ -1,6 +1,7 @@
 include .env
 
 region_pbf = tmp/osm/$(REGION)-latest.osm.pbf
+ucsc_pbf = tmp/osm/ucsc.osm.pbf
 admin_osmjson = tmp/$(ADMIN).osm.json
 admin_geojson = tmp/$(ADMIN).geojson
 admin_poly = tmp/$(ADMIN).poly
@@ -18,6 +19,7 @@ targets = \
 	docs/openmaptiles/fonts/Open\ Sans\ Italic/0-255.pbf \
 	docs/openmaptiles/fonts/Open\ Sans\ Regular/0-255.pbf \
 	$(region_pbf) \
+	$(ucsc_pbf) \
 	$(admin_osmjson) \
 	$(admin_geojson) \
 	$(admin_poly) \
@@ -33,8 +35,8 @@ targets = \
 all: $(targets)
 
 clean:
-	sudo chmod 777 -R tmp
 	rm -rf docs/zxy/*
+	rm -f $(ucsc_pbf)
 	rm -f $(mbtiles)
 	rm -f $(stylejson)
 	rm -f $(tilejson)
@@ -43,7 +45,6 @@ clean:
 	rm -f $(pmtiles_stylejson)
 
 clean-all: clean
-	sudo chmod 777 -R tmp
 	rm -f $(admin_osmjson)
 	rm -f $(admin_geojson)
 	rm -f $(admin_poly)
@@ -95,16 +96,16 @@ $(region_pbf):
 		--output $(region_pbf) \
 		https://download.geofabrik.de/$(REGION)-latest.osm.pbf
 
-#$(ucsc_pbf):
-#	docker run \
-#		-i \
-#		--rm \
-#		--mount type=bind,source=$(CURDIR)/tmp,target=/tmp \
-#		yuiseki/vector-tile-builder \
-#			osmium extract \
-#				--bbox=$(BBOX) \
-#				--output=/$(ucsc_pbf) \
-#				/$(region_pbf)
+$(ucsc_pbf):
+	docker run \
+		-i \
+		--rm \
+		--mount type=bind,source=$(CURDIR)/tmp,target=/tmp \
+		yuiseki/vector-tile-builder \
+			osmium extract \
+				--bbox=$(BBOX) \
+				--output=/$(ucsc_pbf) \
+				/$(region_pbf)
 
 QUERY = data=[out:json][timeout:30000]; relation["name:en"="$(ADMIN)"]; out geom;
 $(admin_osmjson):
@@ -135,7 +136,7 @@ $(admin_pbf):
 		--rm \
 		--mount type=bind,source=$(CURDIR)/tmp,target=/tmp \
 		yuiseki/vector-tile-builder \
-			osmconvert /$(region_pbf) -B="/$(admin_poly)" --complete-ways -o=/$(admin_pbf)
+			osmconvert /$(ucsc_pbf) -B="/$(admin_poly)" --complete-ways -o=/$(admin_pbf)
 
 #
 # tilemaker
@@ -151,8 +152,9 @@ $(mbtiles):
 			tilemaker \
 				--threads 3 \
 				--skip-integrity \
-				--input /$(region_pbf) \
-				--output /$(mbtiles)
+				--input /$(ucsc_pbf) \
+				--output /$(mbtiles) \
+				--bbox $(BBOX) 
 
 
 # Generate TileJSON format file from MBTiles format file
@@ -253,6 +255,7 @@ start:
 # Initialize gh-pages branch
 .PHONY: init-gh-pages
 init-gh-pages:
+	rm -rf ${pmtiles}
 	git checkout --orphan gh-pages
 	git config http.postBuffer 524288000
 	git commit --allow-empty -m "empty commit"
@@ -263,6 +266,7 @@ init-gh-pages:
 .PHONY: gh-pages
 gh-pages:
 	sed -i '/docs/d' ./.gitignore
+	rm -rf ${pmtiles}
 	git config http.postBuffer 524288000
 	git add .
 	git commit -m "Edit .gitignore to publish"
