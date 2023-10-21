@@ -37,8 +37,7 @@
         const center = tilejson.center
           ? tilejson.center
           : [(bounds[0] + bounds[2]) / 2, (bounds[1] + bounds[3]) / 2];
-        //const zoom = (tilejson.minzoom + tilejson.maxzoom) / 2;
-				const zoom = 12;
+        const zoom = (tilejson.minzoom + tilejson.maxzoom) / 2;
         console.log(center, zoom);
         map = new maplibregl.Map({
           container: "map",
@@ -47,7 +46,6 @@
           zoom: zoom,
           hash: true,
         });
-				map.setMaxZoom(tilejson.maxzoom);
 
         map.addControl(new maplibregl.NavigationControl(), "top-right");
         map.addControl(
