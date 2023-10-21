@@ -187,6 +187,7 @@ $(zxy_metadata):
 				--no-tile-compression \
 				--no-tile-size-limit \
 				--no-tile-stats \
+				-z16 \
 				--output-to-directory=/tmp/zxy \
 				/$(mbtiles)
 	cp -r tmp/zxy docs/
