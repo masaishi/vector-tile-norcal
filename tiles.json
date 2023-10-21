@@ -180,6 +180,6 @@
     }
   ],
   "tiles": [
-    "http://localhost:8000/zxy/{z}/{x}/{y}.pbf"
+    "https://masaishi.github.io/vector-tile-ucsc/zxy/{z}/{x}/{y}.pbf"
   ]
 }

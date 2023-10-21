@@ -44,11 +44,11 @@
   "sources": {
     "openmaptiles": {
       "type": "vector",
-      "url": "http://localhost:8000/tiles.json"
+      "url": "https://masaishi.github.io/vector-tile-ucsc/tiles.json"
     }
   },
-  "sprite": "http://localhost:8000/openmaptiles/osm-bright-gl-style/sprite",
-  "glyphs": "http://localhost:8000/openmaptiles/fonts/{fontstack}/{range}.pbf",
+  "sprite": "https://masaishi.github.io/vector-tile-ucsc/openmaptiles/osm-bright-gl-style/sprite",
+  "glyphs": "https://masaishi.github.io/vector-tile-ucsc/openmaptiles/fonts/{fontstack}/{range}.pbf",
   "layers": [
     {
       "id": "background",
